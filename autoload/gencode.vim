@@ -47,12 +47,9 @@ function! gencode#GenDefinition() "{{{
     let l:classLineContent = join(l:classLineContentList, ' ')
     if strlen(l:classLineContent) > 0
         let l:className = matchlist(l:classLineContent, '\(\<class\>\|\<struct\>\)\s\+\(\w[a-zA-Z0-9_]*\)')[2]
-        echom 'className: ' . l:className
         " let l:lineContentMatchList = matchlist(l:lineContent, '\(\w[a-zA-Z0-9_]\+\s\+\)\?\(\~\?\w[a-zA-Z0-9_]\+\s*(.*)\s*\);', '\1'.l:className.'::\2')
         " \%(\w[a-zA-Z0-9_]*\%(\s*::\)\?\)\+] \%(\s*::\)\?
         let l:lineContentMatchList = matchlist(l:lineContent, '\(\%(\%(\w[a-zA-Z0-9_:*]*\)\s\)\+\)\(\~\?\w[a-zA-Z0-9_]*\s*\((\?.*)\)\?\s*\%(const\)\?\);')
-        " echom "l:lineContentMatchList[1]: " . l:lineContentMatchList[1]
-        " echom "l:lineContentMatchList[2]: " . l:lineContentMatchList[2]
         let l:lineContent = l:lineContentMatchList[1] . l:className  . '::' . l:lineContentMatchList[2]
         if empty(l:lineContentMatchList[3])
             " variable
@@ -99,6 +96,13 @@ function! gencode#GenDefinition() "{{{
 
     if l:lineContent =~ '(.*)'
         call add(l:appendContent, '{')
+
+        if exists("g:cpp_gencode_function_attach_statement")
+            for statement in g:cpp_gencode_function_attach_statement
+                call add(l:appendContent, <SID>ConstructIndentLine(statement))
+            endfor
+        endif
+
         if l:returnType == 'bool'
             call add(l:appendContent, <SID>ConstructReturnContent('true'));
         elseif l:returnType =~ 'char'

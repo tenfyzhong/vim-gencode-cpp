@@ -20,6 +20,8 @@ echo 'set runtimepath^=~/.vim/bundle/vim-gencode-cpp' >> ~/.vimrc
 run `GenDefinition` in a function or variable declared  
 
 # Configuration
+`g:cpp_gencode_function_attach_statement`  
+A list of statement, this will be insert into function body before the function return.  
 
 # Dependency
 - [a.vim](https://github.com/vim-scripts/a.vim)
