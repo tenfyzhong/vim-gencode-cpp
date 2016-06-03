@@ -4,6 +4,7 @@ auto generate function definition or declaration
 # Features
 - generate the function definitions of class  
 - generate the static variable fefinitions of class  
+- generate the declaration of the function
 
 # Install
 ~windows users change all occurrencws of `~/.vim` to `~\vimfiles`.  
@@ -18,6 +19,7 @@ echo 'set runtimepath^=~/.vim/bundle/vim-gencode-cpp' >> ~/.vimrc
 
 # Usage
 run `GenDefinition` in a function or variable declared  
+run `GenDeclaration` in a definition of a function
 
 # Configuration
 `g:cpp_gencode_function_attach_statement`  
@@ -27,5 +29,4 @@ A list of statement, this will be insert into function body before the function 
 - [a.vim](https://github.com/vim-scripts/a.vim)
 
 # TODO
-generate function declaration with a definition  
 
