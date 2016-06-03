@@ -21,6 +21,9 @@ run `GenDefinition` in a function or variable declared
 
 # Configuration
 
+# Dependency
+- [a.vim](https://github.com/vim-scripts/a.vim)
+
 # TODO
 generate function declaration with a definition  
 
