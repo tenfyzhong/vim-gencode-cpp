@@ -36,7 +36,7 @@ function! gencode#GenDefinition() "{{{
     " remove virtual, static, explicit key word
     let l:lineContent = substitute(l:lineContent, '\%(virtual\|static\|explicit\|inline\)\s\+', '', 'g')
     let l:lineContent = substitute(l:lineContent, '^\s\+', '', '') " delete header space
-    let l:lineContent = substitute(l:lineContent, '\(\w\+\)\s*\(\*\+\)\s*\(\w\+\)', '\1\2 \3', '')  " format to: int* func(...);
+    let l:lineContent = substitute(l:lineContent, '\(\w\+\)\s*\(\*\|&\+\)\s*\(\w\+\)', '\1\2 \3', '')  " format to: int* func(...);
     let l:lineContent = substitute(l:lineContent, '\s\s\+', ' ', 'g') " delete more space
 
     " get class content
@@ -46,7 +46,7 @@ function! gencode#GenDefinition() "{{{
     let l:classLineContent = join(l:classLineContentList, ' ')
     if strlen(l:classLineContent) > 0
         let l:className = matchlist(l:classLineContent, '\(\<class\>\|\<struct\>\)\s\+\(\w[a-zA-Z0-9_]*\)')[2]
-        let l:lineContentMatchList = matchlist(l:lineContent, '\(\%(\%(\w[a-zA-Z0-9_:*]*\)\s\)\+\)\(\~\?\w[a-zA-Z0-9_]*\s*\((\?.*)\)\?\s*\%(const\)\?\);') " match function declare, \1 match return type, \2 match function name and argument, \3 match argument
+        let l:lineContentMatchList = matchlist(l:lineContent, '\(\%(\%(\w[a-zA-Z0-9_:*&]*\)\s\)\+\)\(\~\?\w[a-zA-Z0-9_]*\s*\((\?.*)\)\?\s*\%(const\)\?\);') " match function declare, \1 match return type, \2 match function name and argument, \3 match argument
         let l:lineContent = l:lineContentMatchList[1] . l:className  . '::' . l:lineContentMatchList[2]
 
         if empty(l:lineContentMatchList[3])
