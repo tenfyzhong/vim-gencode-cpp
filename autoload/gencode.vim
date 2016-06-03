@@ -153,7 +153,7 @@ function! s:GetClassLine(className) "{{{
     return l:classLine
 endfunction "}}}
 
-function! gencode#GenDeclaration()
+function! gencode#GenDeclaration() "{{{
     let l:curline = line('.')
     let l:functionLeftBraces = search('{', 'n')
     if l:functionLeftBraces == 0
@@ -188,4 +188,4 @@ function! gencode#GenDeclaration()
     endif
 
     call append(l:appendLine, <SID>ConstructIndentLine(l:appendContent))
-endfunction
+endfunction "}}}
