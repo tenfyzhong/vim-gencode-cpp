@@ -37,24 +37,31 @@ function! s:GenDefinition() "{{{
     let l:lineContent = substitute(l:lineContent, 'explicit\s\+', '', '')
     let l:isInline    = match(l:lineContent, 'inline') != -1
     let l:lineContent = substitute(l:lineContent, 'inline\s\+', '', '')
-    let l:lineContent = substitute(l:lineContent, '^\s\+', '', '')
+    let l:lineContent = substitute(l:lineContent, '^\s\+', '', '') " delete header space
+    let l:lineContent = substitute(l:lineContent, '\(\w\+\)\s*\(\*\+\)\s*\(\w\+\)', '\1\2 \3', '')  " format to: int* func(...);
+    let l:lineContent = substitute(l:lineContent, '\s\s\+', ' ', 'g') " delete more space
 
     let l:classLine = search('\<class\>\|\<struct\>', 'b')
     let l:classLineLeftBraces = search('{', 'n')
     let l:classLineContentList = getline(l:classLine, l:classLineLeftBraces)
     let l:classLineContent = join(l:classLineContentList, '\n')
     if strlen(l:classLineContent) > 0
-        let l:className = matchlist(l:classLineContent, '\(\<class\>\|\<struct\>\)\s\+\(\w[a-zA-Z0-9]*\)')[2]
-        " let l:lineContentMatchList = matchlist(l:lineContent, '\(\w[a-zA-Z0-9]\+\s\+\)\?\(\~\?\w[a-zA-Z0-9]\+\s*(.*)\s*\);', '\1'.l:className.'::\2')
-        " \%(\w[a-zA-Z0-9]*\%(\s*::\)\?\)\+] \%(\s*::\)\?
-        let l:lineContentMatchList = matchlist(l:lineContent, '\(\%(\w[a-zA-Z0-9:]*\**\s\+\)*\)\(\~\?\w[a-zA-Z0-9]\+\s*(.*)\s*\);')
+        let l:className = matchlist(l:classLineContent, '\(\<class\>\|\<struct\>\)\s\+\(\w[a-zA-Z0-9_]*\)')[2]
+        " let l:lineContentMatchList = matchlist(l:lineContent, '\(\w[a-zA-Z0-9_]\+\s\+\)\?\(\~\?\w[a-zA-Z0-9_]\+\s*(.*)\s*\);', '\1'.l:className.'::\2')
+        " \%(\w[a-zA-Z0-9_]*\%(\s*::\)\?\)\+] \%(\s*::\)\?
+        let l:lineContentMatchList = matchlist(l:lineContent, '\(\%(\%(\w[a-zA-Z0-9_:*]*\)\s\)\+\)\(\~\?\w[a-zA-Z0-9_]*\s*(.*)\s*\%(const\)\?\);')
+        " echom "l:lineContentMatchList[1]: " . l:lineContentMatchList[1]
+        " echom "l:lineContentMatchList[2]: " . l:lineContentMatchList[2]
         let l:lineContent = l:lineContentMatchList[1] . l:className  . '::' . l:lineContentMatchList[2]
         let l:returnType = substitute(l:lineContentMatchList[1], '^\s*\(.*\S\)\s*$', '\1', '')
     endif
 
     let l:fileExtend = expand('%:e')
     if !l:isInline && l:fileExtend == 'h'
-        exec ':A'
+        try
+            exec ':A'
+        catch
+        endtry
     endif
 
     let l:pos = getpos('.')
