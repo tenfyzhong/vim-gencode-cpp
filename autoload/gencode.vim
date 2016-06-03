@@ -183,9 +183,11 @@ function! gencode#GenDeclaration() "{{{
 
     let l:findLine = search(l:appendContent, 'bn', l:classLine)
     if l:findLine > 0
+        call cursor(l:findLine - 1, 0)
         echom l:appendContent . ' existed'
         return
     endif
 
     call append(l:appendLine, <SID>ConstructIndentLine(l:appendContent))
+    call cursor(l:findLine - 1, 0)
 endfunction "}}}
