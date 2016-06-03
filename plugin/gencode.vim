@@ -12,8 +12,8 @@ if !exists(':A')
     finish
 endif
 
-function! s:ConstructReturnContent(returnContent) "{{{
-    let l:returnContent = 'return ' . a:returnContent . ';'
+function! s:ConstructIndentLine(content)
+    let l:returnContent = a:content
     if &expandtab
         let l:returnContent = repeat(' ', &tabstop) . l:returnContent
     else
@@ -21,6 +21,11 @@ function! s:ConstructReturnContent(returnContent) "{{{
         let l:returnContent = substitute(l:returnContent, ' ', '\t', '')
     endif
     return l:returnContent
+endfunction
+
+function! s:ConstructReturnContent(returnContent) "{{{
+    let l:returnContent = 'return ' . a:returnContent . ';'
+    return <SID>ConstructIndentLine(l:returnContent)
 endfunction "}}}
 
 function! s:GenDefinition() "{{{
@@ -44,20 +49,25 @@ function! s:GenDefinition() "{{{
     let l:classLine = search('\<class\>\|\<struct\>', 'b')
     let l:classLineLeftBraces = search('{', 'n')
     let l:classLineContentList = getline(l:classLine, l:classLineLeftBraces)
-    let l:classLineContent = join(l:classLineContentList, '\n')
+    let l:classLineContent = join(l:classLineContentList, ' ')
     if strlen(l:classLineContent) > 0
         let l:className = matchlist(l:classLineContent, '\(\<class\>\|\<struct\>\)\s\+\(\w[a-zA-Z0-9_]*\)')[2]
+        echom 'className: ' . l:className
         " let l:lineContentMatchList = matchlist(l:lineContent, '\(\w[a-zA-Z0-9_]\+\s\+\)\?\(\~\?\w[a-zA-Z0-9_]\+\s*(.*)\s*\);', '\1'.l:className.'::\2')
         " \%(\w[a-zA-Z0-9_]*\%(\s*::\)\?\)\+] \%(\s*::\)\?
-        let l:lineContentMatchList = matchlist(l:lineContent, '\(\%(\%(\w[a-zA-Z0-9_:*]*\)\s\)\+\)\(\~\?\w[a-zA-Z0-9_]*\s*(.*)\s*\%(const\)\?\);')
+        let l:lineContentMatchList = matchlist(l:lineContent, '\(\%(\%(\w[a-zA-Z0-9_:*]*\)\s\)\+\)\(\~\?\w[a-zA-Z0-9_]*\s*\((\?.*)\)\?\s*\%(const\)\?\);')
         " echom "l:lineContentMatchList[1]: " . l:lineContentMatchList[1]
         " echom "l:lineContentMatchList[2]: " . l:lineContentMatchList[2]
         let l:lineContent = l:lineContentMatchList[1] . l:className  . '::' . l:lineContentMatchList[2]
+        if empty(l:lineContentMatchList[3])
+            " variable
+            let l:lineContent = l:lineContent . ';'
+        endif
         let l:returnType = substitute(l:lineContentMatchList[1], '^\s*\(.*\S\)\s*$', '\1', '')
     endif
 
     let l:fileExtend = expand('%:e')
-    if !l:isInline && l:fileExtend == 'h'
+    if !l:isInline && l:fileExtend ==? 'h'
         try
             exec ':A'
         catch
@@ -72,28 +82,46 @@ function! s:GenDefinition() "{{{
         return
     endif
 
-
-    let l:lastLineContent = getline(line('$'))
-    if l:lastLineContent !~ '^\s*$'
-        call append(line('$'), '')
+    let l:appendLine = line('$')
+    let l:fileExtend = expand('%:e')
+    if l:fileExtend ==? 'h'
+        call cursor(l:appendLine, 0)
+        let l:appendLine = search('#endif', 'b')
+        if l:appendLine > 0
+            let l:appendLine = l:appendLine - 1
+        endif
     endif
 
-    call append(line('$'), l:lineContent)
-    call append(line('$'), '{')
-    if l:returnType == 'bool'
-        call append(line('$'), <SID>ConstructReturnContent('true'));
-    elseif l:returnType =~ 'char'
-        call append(line('$'), <SID>ConstructReturnContent("''"));
-    elseif l:returnType =~ 'int\|unsigned\|long\|char\|uint\|short\|float\|double'
-        call append(line('$'), <SID>ConstructReturnContent('0'))
-    elseif l:returnType == 'void'
-        " empty
-    elseif l:returnType =~ '\*'
-        call append(line('$'), <SID>ConstructReturnContent('NULL'))
-    elseif strlen(l:returnType) > 0
-        call append(line('$'), <SID>ConstructReturnContent(l:returnType . '()'))
+    let l:appendLineContent = getline(l:appendLine)
+
+    let l:appendContent = []
+
+    if l:appendLineContent !~ '^\s*$'
+        call add(l:appendContent, '')
     endif
-    call append(line('$'), '}')
+
+    call add(l:appendContent, l:lineContent)
+
+    if l:lineContent =~ '(.*)'
+        call add(l:appendContent, '{')
+        if l:returnType == 'bool'
+            call add(l:appendContent, <SID>ConstructReturnContent('true'));
+        elseif l:returnType =~ 'char'
+            call add(l:appendContent, <SID>ConstructReturnContent("''"));
+        elseif l:returnType =~ 'int\|unsigned\|long\|char\|uint\|short\|float\|double'
+            call add(l:appendContent, <SID>ConstructReturnContent('0'))
+        elseif l:returnType == 'void'
+            " empty
+        elseif l:returnType =~ '\*'
+            call add(l:appendContent, <SID>ConstructReturnContent('NULL'))
+        elseif strlen(l:returnType) > 0
+            call add(l:appendContent, <SID>ConstructReturnContent(l:returnType . '()'))
+        endif
+        call add(l:appendContent, '}')
+    endif
+
+    call add(l:appendContent, '')
+    call append(l:appendLine, l:appendContent)
 endfunction "}}}
 
 command! GenDefinition call <SID>GenDefinition()
