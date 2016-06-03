@@ -82,6 +82,8 @@ function! gencode#GenDefinition() "{{{
         let l:appendLine = search('#endif', 'b')
         if l:appendLine > 0
             let l:appendLine = l:appendLine - 1
+        else 
+            let l:appendLine = line('$')
         endif
     endif
 
