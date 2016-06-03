@@ -131,7 +131,7 @@ function! s:GetClassLine(className) "{{{
 
     if l:classLine == 0
         let l:fileExtend = expand('%:e')
-        if l:fileExtend =? 'h'
+        if l:fileExtend ==? 'h'
             " if already in header file, return 
             return l:classLine
         endif
