@@ -29,4 +29,6 @@ A list of statement, this will be insert into function body before the function 
 - [a.vim](https://github.com/vim-scripts/a.vim)
 
 # TODO
-
+- support global function  
+- support namespace 
+- support template
