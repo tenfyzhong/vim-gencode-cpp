@@ -7,7 +7,7 @@ auto generate function definition or declaration
 - generate the declaration of the function
 
 # Install
-~windows users change all occurrencws of `~/.vim` to `~\vimfiles`.  
+*windows* users change all occurrencws of `~/.vim` to `~\vimfiles`.  
 - You can choose you preferred bundle manager   
 - Run the following commans in a terminal:  
 ```bash
@@ -24,6 +24,22 @@ run `GenDeclaration` in a definition of a function
 # Configuration
 `g:cpp_gencode_function_attach_statement`  
 A list of statement, this will be insert into function body before the function return.  
+default:   
+```viml
+let g:cpp_gencode_function_attach_statement = []
+```
+sample:  
+```viml
+let g:cpp_gencode_function_attach_statement = ['std::cout << "function body"' << std::endl;']
+```
+it generate definition like this:  
+```cpp
+int function()
+{
+    std::cout << "function body" << std::endl;
+    return 0;
+}
+```
 
 # Dependency
 - [a.vim](https://github.com/vim-scripts/a.vim)
