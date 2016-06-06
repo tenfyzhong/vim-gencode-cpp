@@ -7,14 +7,22 @@
 " created: 2016-06-06 15:03:16
 "==============================================================
 
-function! s:GetClassLine(className) "{{{
-    let l:classLine = search('class\_\s\+' . a:className, 'b')
+function! s:GetInsertSpace(spaceName) "{{{
+    let l:spaceList = split(a:spaceName, '::')
 
-    if l:classLine == 0
+    let l:break = 0
+    for space in l:spaceList
+        let l:spaceNameLine = search('\%(class\|namespace\)\_\s\+' . space, 'b')
+        if l:spaceNameLine == 0
+            let l:break = 1
+        endif
+    endfor
+
+    if l:break != 0
         let l:fileExtend = expand('%:e')
         if l:fileExtend ==? 'h'
             " if already in header file, return 
-            return l:classLine
+            return l:spaceNameLine
         endif
 
         " in source file
@@ -23,15 +31,15 @@ function! s:GetClassLine(className) "{{{
         catch
         endtry
 
-        call cursor(0, 0)
-        let l:classLine = search('class\_\s\+' . a:className)
-
-        if l:classLine == 0
-            return l:classLine
-        endif
+        for space in l:spaceList
+            let l:spaceNameLine = search('\%(class\|namespace\)\_\s\+' . space, 'b')
+            if l:spaceNameLine == 0
+                let l:break = 1
+            endif
+        endfor
     endif
 
-    return l:classLine
+    return l:spaceNameLine
 endfunction "}}}
 
 function! gencode#declaration#Generate() "{{{
@@ -45,13 +53,15 @@ function! gencode#declaration#Generate() "{{{
     let l:functionDeclare = join(l:functionDeclareList, '\n')
     let l:functionDeclare = substitute(l:functionDeclare, '\s\s+', ' ', 'g')
     let l:functionDeclare = substitute(l:functionDeclare, '\(\w\+\)\s*\(\*\|&\+\)\s*\(\w\+\)', '\1\2 \3', '')  " format to: int* func(...);
-    let l:functionMatchList = matchlist(l:functionDeclare, '\(\%(\%(\w[a-zA-Z0-9_:*&]*\)\s\)\+\)\(\w[a-zA-Z0-9_]*\)\s*::\s*\(\S\+\s*(.*)\s*\%(const\)\?\)') " \1 match return type, \2 match class name, \3 match function name and argument
-    let l:returnType = l:functionMatchList[1]
-    let l:className = l:functionMatchList[2]
-    let l:functionName = l:functionMatchList[3]
+    let l:functionMatchList = matchlist(l:functionDeclare, '\(\%(\%(\w[a-zA-Z0-9_:*&]*\)\s\)\+\)\(\%(\w[a-zA-Z0-9_]*::\)*\)\(\S\+\s*(.*)\s*\%(const\)\?\)') " \1 match return type, \2 match class name, \3 match function name and argument
+    try
+        let [l:matchall, l:returnType, l:spaceName, l:functionName; l:rest] = l:functionMatchList
+    catch
+        return
+    endtry
 
-    let l:classLine = <SID>GetClassLine(l:className)
-    if l:classLine == 0
+    let l:spaceNameLine = <SID>GetInsertSpace(l:spaceName)
+    if l:spaceNameLine == 0
         return
     endif
 
@@ -62,9 +72,8 @@ function! gencode#declaration#Generate() "{{{
     let l:appendLine = line('.') - 1
 
     let l:appendContent = l:returnType . l:functionName . ';'
-    echom 'appendContent: ' . l:appendContent
 
-    let l:findLine = search('\V'.l:appendContent, 'bn', l:classLine)
+    let l:findLine = search('\V'.l:appendContent, 'bn', l:spaceNameLine)
     if l:findLine > 0
         call cursor(l:findLine - 1, 0)
         echom l:appendContent . ' existed'
