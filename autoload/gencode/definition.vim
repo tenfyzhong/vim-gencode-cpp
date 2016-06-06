@@ -16,7 +16,7 @@ function! s:GetDeclaration(line) "{{{
     let l:pos = getpos('.')
     call cursor(a:line)
     let l:functionBeginLine   = a:line
-    let l:functionEndLine     = search(';', 'n')
+    let l:functionEndLine     = search(';\|{', 'n')
     call setpos('.', l:pos)
     if l:functionEndLine == 0
         let l:functionEndLine = l:functionBeginLine
@@ -83,19 +83,36 @@ endfunction "}}}
 
 function! gencode#definition#Generate() "{{{
     let l:line        = line('.')
+    let l:declareationFileName = expand('%')
     let l:declaration = <SID>GetDeclaration(l:line)
+    if match(l:declaration, '{') != -1
+        echom "has defined"
+        return
+    endif
 
     let l:isInline    = <SID>IsInlineDeclaration(l:declaration)
-
-    let l:declareationFileName = expand('%')
 
     " if header file, change to source file
     let l:fileExtend = expand('%:e')
     let l:needChangeFile = !l:isInline && l:fileExtend ==? 'h'
 
     let l:formatedDeclaration  = <SID>FormatDeclaration(l:declaration)
-    let l:declarationDecompose = matchlist(l:formatedDeclaration, '\(\%(\%(\w[a-zA-Z0-9_:*&]*\)\s\)\+\)\(\~\?\w[a-zA-Z0-9_]*\s*\((\?.*)\)\?\s*\%(const\)\?\);') " match function declare, \1 match return type, \2 match function name and argument, \3 match argument
-    let [l:matchall, l:returnType, l:functionBody, l:argument; l:rest] = l:declarationDecompose
+    let l:declarationDecompose = matchlist(l:formatedDeclaration, '\(\%(\%(\w[a-zA-Z0-9_:*&]*\)\s\)\+\)\(\~\?\w[a-zA-Z0-9_]*\s*\((\?.*)\)\?\s*\%(const\)\?\)\(\s*=\s*\w+\)\?;') " match function declare, \1 match return type, \2 match function name and argument, \3 match argument
+    try
+        let [l:matchall, l:returnType, l:functionBody, l:argument, l:assign; l:rest] = l:declarationDecompose
+    catch
+        return
+    endtry
+
+    if empty(l:argument) && match(l:declaration, 'static') == -1
+        echom "no need to define"
+        return
+    endif
+
+    if empty(l:argument) && !empty(l:assign)
+        echom "no need to define"
+        return
+    endif
 
     " jump to previous unmatch {
     normal [{
