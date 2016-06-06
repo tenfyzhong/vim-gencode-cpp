@@ -13,4 +13,4 @@ if !exists(':A')
 endif
 
 command! GenDefinition call gencode#definition#Generate()
-command! GenDeclaration call gencode#GenDeclaration()
+command! GenDeclaration call gencode#declaration#Generate()
