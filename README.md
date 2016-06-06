@@ -46,5 +46,4 @@ int function()
 
 # TODO
 - support global function  
-- support namespace 
 - support template
