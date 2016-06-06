@@ -12,7 +12,7 @@ function! s:ConstructReturnContent(returnContent) "{{{
     return gencode#ConstructIndentLine(l:returnContent)
 endfunction "}}}
 
-function! s:GetDeclaration(line)
+function! s:GetDeclaration(line) "{{{
     let l:pos = getpos('.')
     call cursor(a:line)
     let l:functionBeginLine   = a:line
@@ -24,13 +24,13 @@ function! s:GetDeclaration(line)
     let l:functionList = getline(l:functionBeginLine, l:functionEndLine)
     let l:function     = join(l:functionList, '\n')
     return l:function
-endfunction
+endfunction "}}}
 
-function! s:IsInlineDeclaration(declaration)
+function! s:IsInlineDeclaration(declaration) "{{{
     return match(a:declaration, 'inline') != -1
-endfunction
+endfunction "}}}
 
-function! s:FormatDeclaration(declaration)
+function! s:FormatDeclaration(declaration) "{{{
     " remove virtual, static, explicit key word
     let l:lineContent = a:declaration
     let l:lineContent = substitute(l:lineContent, '\%(virtual\|static\|explicit\|inline\)\s\+', '', 'g')
@@ -38,9 +38,9 @@ function! s:FormatDeclaration(declaration)
     let l:lineContent = substitute(l:lineContent, '\(\w\+\)\s*\(\*\|&\+\)\s*\(\w\+\)', '\1\2 \3', '')  " format to: int* func(...);
     let l:lineContent = substitute(l:lineContent, '\s\s\+', ' ', 'g') " delete more space
     return l:lineContent
-endfunction
+endfunction "}}}
 
-function! s:GetClassName(line)
+function! s:GetClassName(line) "{{{
     let l:cword = expand('<cword>')
     if l:cword !~ '{'
         return ''
@@ -58,7 +58,28 @@ function! s:GetClassName(line)
 
     let l:className = matchlist(l:classDeclaration, '\(\<class\>\|\<struct\>\)\s\+\(\w[a-zA-Z0-9_]*\)')[2]
     return l:className
-endfunction
+endfunction "}}}
+
+function! s:GetNamespaceList(line) "{{{
+    call cursor(a:line)
+    normal [{
+    let l:braceLine = line('.')
+    if l:braceLine == a:line
+        return []
+    endif
+
+    let l:classBeginLine = search('namespace\_\s\+\w\+\_\s*{', 'b')
+    let l:searchBraceLine = search('{')
+
+    if l:braceLine != l:searchBraceLine
+        return []
+    else
+        let l:namespaceContentList = getline(l:classBeginLine, l:searchBraceLine)
+        let l:namespaceContent = join(l:namespaceContentList, ' ')
+        let l:namespaceName = matchlist(l:namespaceContent, 'namespace\%(\_\s\+\(\w\+\)\)\?\_\s*{')[1]
+        return insert(<SID>GetNamespaceList(l:braceLine), l:namespaceName)
+    endif
+endfunction "}}}
 
 function! gencode#definition#Generate() "{{{
     let l:line        = line('.')
@@ -66,27 +87,38 @@ function! gencode#definition#Generate() "{{{
 
     let l:isInline    = <SID>IsInlineDeclaration(l:declaration)
 
+    " if header file, change to source file
+    let l:fileExtend = expand('%:e')
+    let l:needChangeFile = !l:isInline && l:fileExtend ==? 'h'
+
     let l:formatedDeclaration  = <SID>FormatDeclaration(l:declaration)
     let l:declarationDecompose = matchlist(l:formatedDeclaration, '\(\%(\%(\w[a-zA-Z0-9_:*&]*\)\s\)\+\)\(\~\?\w[a-zA-Z0-9_]*\s*\((\?.*)\)\?\s*\%(const\)\?\);') " match function declare, \1 match return type, \2 match function name and argument, \3 match argument
     let [l:matchall, l:returnType, l:functionBody, l:argument; l:rest] = l:declarationDecompose
 
     " jump to previous unmatch {
     normal [{
-    let l:className     = <SID>GetClassName(line('.'))
+    let l:classBraceLine = line('.')
+    let l:className     = <SID>GetClassName(l:classBraceLine)
 
-    if len(l:className) > 0
-        let l:lineContent = l:returnType . l:className . '::' . l:functionBody
+    let l:namespaceList = <SID>GetNamespaceList(l:classBraceLine)
+    call cursor(l:classBraceLine, 0)
+
+    let l:namespace = join(l:namespaceList, '::') 
+    if !empty(l:namespace) && l:namespace[-2:-1] != '::'
+        let l:namespace = l:namespace . '::'
+    endif
+
+    if !empty(l:className) 
+        let l:lineContent = l:returnType . l:namespace . l:className . '::' . l:functionBody
     else
-        let l:lineContent = l:returnType . l:functionBody
+        let l:lineContent = l:returnType . l:namespace . l:functionBody
     endif
 
     if empty(l:argument)
         let l:lineContent = l:lineContent . ';'
     endif
 
-    " if header file, change to source file
-    let l:fileExtend = expand('%:e')
-    if !l:isInline && l:fileExtend ==? 'h'
+    if l:needChangeFile
         try
             exec ':A'
         catch
