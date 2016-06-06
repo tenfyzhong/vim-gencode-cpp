@@ -45,5 +45,4 @@ int function()
 - [a.vim](https://github.com/vim-scripts/a.vim)
 
 # TODO
-- support global function  
 - support template
