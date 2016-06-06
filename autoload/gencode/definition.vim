@@ -185,7 +185,7 @@ function! gencode#definition#Generate() "{{{
         return
     endif
 
-    if l:digInNamespaceEndLine > 0
+    if l:digInNamespaceLine > 0 && l:digInNamespaceEndLine > 0
         let l:appendLine = l:digInNamespaceEndLine - 1
     else
         let l:appendLine = line('$')
