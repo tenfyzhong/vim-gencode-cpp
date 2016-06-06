@@ -77,7 +77,7 @@ function! s:GetNamespaceList(line) "{{{
         let l:namespaceContentList = getline(l:classBeginLine, l:searchBraceLine)
         let l:namespaceContent = join(l:namespaceContentList, ' ')
         let l:namespaceName = matchlist(l:namespaceContent, 'namespace\%(\_\s\+\(\w\+\)\)\?\_\s*{')[1]
-        return insert(<SID>GetNamespaceList(l:braceLine), l:namespaceName)
+        return add(<SID>GetNamespaceList(l:braceLine), l:namespaceName)
     endif
 endfunction "}}}
 
@@ -86,6 +86,8 @@ function! gencode#definition#Generate() "{{{
     let l:declaration = <SID>GetDeclaration(l:line)
 
     let l:isInline    = <SID>IsInlineDeclaration(l:declaration)
+
+    let l:declareationFileName = expand('%')
 
     " if header file, change to source file
     let l:fileExtend = expand('%:e')
@@ -103,6 +105,40 @@ function! gencode#definition#Generate() "{{{
     let l:namespaceList = <SID>GetNamespaceList(l:classBraceLine)
     call cursor(l:classBraceLine, 0)
 
+    if l:needChangeFile
+        try
+            exec ':A'
+        catch
+        endtry
+    endif
+
+    let l:definitionFileName = expand('%')
+
+    " remove using namespace
+    while !empty(l:namespaceList)
+        let l:processNamespace = l:namespaceList[0]
+        let l:searchNamespace = search('using\_\s\+namespace\_\s\+' . l:processNamespace . '\_\s*;')
+        if l:searchNamespace > 0
+            call remove(l:namespaceList, 0, 0)
+        else
+            break
+        endif
+    endwhile
+    
+    let l:digInNamespaceLine = 0
+    while !empty(l:namespaceList)
+        let l:processNamespace = l:namespaceList[0]
+        let l:searchNamespace = search('namespace\_\s\+' . l:processNamespace . '\_\s*{', 'e')
+
+        if l:searchNamespace != 0
+            let l:digInNamespaceLine = l:searchNamespace
+            call remove(l:namespaceList, 0, 0)
+        else
+            break
+        endif
+    endwhile
+
+    " no in the same file
     let l:namespace = join(l:namespaceList, '::') 
     if !empty(l:namespace) && l:namespace[-2:-1] != '::'
         let l:namespace = l:namespace . '::'
@@ -118,32 +154,34 @@ function! gencode#definition#Generate() "{{{
         let l:lineContent = l:lineContent . ';'
     endif
 
-    if l:needChangeFile
-        try
-            exec ':A'
-        catch
-        endtry
-    endif
 
     " if definition existed, finish
     let l:pos = getpos('.')
-    call cursor(0, 0)
-    let l:searchResult = search('\V' . l:lineContent)
+    call cursor(l:digInNamespaceLine, 0)
+    normal ]}
+    let l:digInNamespaceEndLine = line('.')
+    call cursor(l:digInNamespaceLine, 0)
+
+    let l:searchResult = search('\V' . l:lineContent, '', l:digInNamespaceEndLine)
     if l:searchResult > 0
         echom l:lineContent . ' existd'
         return
     endif
 
-    let l:appendLine = line('$')
-    let l:fileExtend = expand('%:e')
-    " if in header file, set the append line before the '#endif' line
-    if l:fileExtend ==? 'h'
-        call cursor(l:appendLine, 0)
-        let l:appendLine = search('#endif', 'b')
-        if l:appendLine > 0
-            let l:appendLine = l:appendLine - 1
-        else 
-            let l:appendLine = line('$')
+    if l:digInNamespaceEndLine > 0
+        let l:appendLine = l:digInNamespaceEndLine - 1
+    else
+        let l:appendLine = line('$')
+        let l:fileExtend = expand('%:e')
+        " if in header file, set the append line before the '#endif' line
+        if l:fileExtend ==? 'h'
+            call cursor(l:appendLine, 0)
+            let l:appendLine = search('#endif', 'b')
+            if l:appendLine > 0
+                let l:appendLine = l:appendLine - 1
+            else 
+                let l:appendLine = line('$')
+            endif
         endif
     endif
 
