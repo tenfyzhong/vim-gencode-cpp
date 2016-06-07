@@ -84,6 +84,7 @@ Github: https://github.com/tenfyzhong/vim-gencode-cpp
 
 ==============================================================================
 9. Changelog                                                *GencodeChangelog*
+v1.3.1 fix when there are not a class, it can not find namespace
 v1.3.0 generate definition support template
 v1.2.1 fix can not find class
 v1.2.0 generate declaration support namespace
