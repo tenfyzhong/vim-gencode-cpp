@@ -60,7 +60,7 @@ function! s:GetClassName(line) "{{{
     return l:className
 endfunction "}}}
 
-function! s:GetTemplate(line, className)
+function! s:GetTemplate(line, className) "{{{
     if empty(a:className)
         return []
     endif
@@ -83,7 +83,7 @@ function! s:GetTemplate(line, className)
     endfor
 
     return l:typeList
-endfunction
+endfunction "}}}
 
 function! s:GetNamespaceList(line) "{{{
     call cursor(a:line)
@@ -145,6 +145,7 @@ function! gencode#definition#Generate() "{{{
     let l:className     = <SID>GetClassName(l:classBraceLine)
     let l:templateTypeList   = <SID>GetTemplate(l:classBraceLine, l:className)
 
+    let l:templateTypeBody = ''
     if !empty(l:className) && !empty(l:templateTypeList)
         let l:needChangeFile = 0
 
@@ -158,8 +159,10 @@ function! gencode#definition#Generate() "{{{
         let l:className = l:className . l:templateTypeBody
     endif
 
-    let l:namespaceList = <SID>GetNamespaceList(l:classBraceLine)
-    call cursor(l:classBraceLine, 0)
+    let l:getNamespaceLine = empty(l:className) ? l:line : l:classBraceLine
+
+    let l:namespaceList = <SID>GetNamespaceList(l:getNamespaceLine)
+    call cursor(l:getNamespaceLine, 0)
 
     if l:needChangeFile
         try
