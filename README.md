@@ -34,7 +34,7 @@ let g:cpp_gencode_function_attach_statement = ['std::cout << "function body"' <<
 ```
 it generate definition like this:  
 ```cpp
-int function()
+int Foo::function()
 {
     std::cout << "function body" << std::endl;
     return 0;

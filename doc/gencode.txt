@@ -84,8 +84,11 @@ Github: https://github.com/tenfyzhong/vim-gencode-cpp
 
 ==============================================================================
 9. Changelog                                                *GencodeChangelog*
-v1.0.0
-  * Initial stable release
+v1.3.0 generate definition support template
+v1.2.1 fix can not find class
+v1.2.0 generate declaration support namespace
+v1.1.0 support namespace
+v1.0.0 Initial stable release
 
 
 vim:ft=help:et:ts=2:sw=2:sts=2:norl:tw=78
