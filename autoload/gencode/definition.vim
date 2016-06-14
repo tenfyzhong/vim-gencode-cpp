@@ -109,6 +109,14 @@ function! s:GetNamespaceList(line) "{{{
     endif
 endfunction "}}}
 
+function! s:SearchFunction(content, line)
+    let l:content = escape(a:content, '.*\')
+    let l:content = substitute(l:content, ' ', '\_\s*', 'g')
+    let l:content = l:content . '\s*$'
+    let l:searchResult = search(l:content, '', a:line)
+    return l:searchResult
+endfunction
+
 function! gencode#definition#Generate() "{{{
     let l:line        = line('.')
     let l:declareationFileName = expand('%')
@@ -203,6 +211,7 @@ function! gencode#definition#Generate() "{{{
 
     " no in the same file
     let l:namespace = join(l:namespaceList, '::') 
+    echom 'namespace: ' . l:namespace
     if !empty(l:namespace) && l:namespace[-2:-1] != '::'
         let l:namespace = l:namespace . '::'
     endif
@@ -225,7 +234,8 @@ function! gencode#definition#Generate() "{{{
     let l:digInNamespaceEndLine = line('.')
     call cursor(l:digInNamespaceLine, 0)
 
-    let l:searchResult = search('\V' . l:lineContent, '', l:digInNamespaceEndLine)
+    " let l:searchResult = search('\V' . l:lineContent, '', l:digInNamespaceEndLine)
+    let l:searchResult = <SID>SearchFunction(l:lineContent, l:digInNamespaceEndLine)
     if l:searchResult > 0
         echom l:lineContent . ' existd'
         return
