@@ -22,7 +22,7 @@ function! s:GetDeclaration(line) "{{{
         let l:functionEndLine = l:functionBeginLine
     endif
     let l:functionList = getline(l:functionBeginLine, l:functionEndLine)
-    let l:function     = join(l:functionList, '\n')
+    let l:function     = join(l:functionList, " ")
     return l:function
 endfunction "}}}
 
@@ -35,8 +35,11 @@ function! s:FormatDeclaration(declaration) "{{{
     let l:lineContent = a:declaration
     let l:lineContent = substitute(l:lineContent, '\%(virtual\|static\|explicit\|inline\)\s\+', '', 'g')
     let l:lineContent = substitute(l:lineContent, '^\s\+', '', '') " delete header space
-    let l:lineContent = substitute(l:lineContent, '\(\w\+\)\s*\(\*\|&\+\)\s*\(\w\+\)', '\1\2 \3', '')  " format to: int* func(...);
+    let l:lineContent = substitute(l:lineContent, '\(\w\+\)\s*\(\%(\*\|&\)\+\)\s*\(\S\+(\)', '\1\2 \3', '')  " format to: int* func(...);
     let l:lineContent = substitute(l:lineContent, '\s\s\+', ' ', 'g') " delete more space
+    let l:lineContent = substitute(l:lineContent, '\s\+(', '(', '')
+    let l:lineContent = substitute(l:lineContent, '(\s\+', '(', '')
+    let l:lineContent = substitute(l:lineContent, '\s\+)', ')', '')
     return l:lineContent
 endfunction "}}}
 
@@ -122,9 +125,10 @@ function! gencode#definition#Generate() "{{{
     let l:needChangeFile = !l:isInline && l:fileExtend ==? 'h'
 
     let l:formatedDeclaration  = <SID>FormatDeclaration(l:declaration)
-    let l:declarationDecompose = matchlist(l:formatedDeclaration, '\(\%(\%(\w[a-zA-Z0-9_:*&]*\)\s\)\+\)\(\~\?\w[a-zA-Z0-9_]*\s*\((\?.*)\)\?\s*\%(const\)\?\)\(\s*=\s*\w+\)\?;') " match function declare, \1 match return type, \2 match function name and argument, \3 match argument
+    let l:declarationDecompose = matchlist(l:formatedDeclaration, '\(\%(\%(\w[a-zA-Z0-9_:*&]*\)\s\)*\)\(\~\?\w[a-zA-Z0-9_]*\s*\((\?.*)\)\?\s*\%(const\)\?\)\s*\%(=\s*\w\+\)\?\s*;') " match function declare, \1 match return type, \2 match function name and argument, \3 match argument
     try
         let [l:matchall, l:returnType, l:functionBody, l:argument, l:assign; l:rest] = l:declarationDecompose
+        let l:functionBody = substitute(l:functionBody, '\_\s*=[^,)]\+\([,)]\)\?', '\1', 'g')
     catch
         return
     endtry
@@ -271,17 +275,26 @@ function! gencode#definition#Generate() "{{{
             endfor
         endif
 
-        if l:returnType == 'bool'
-            call add(l:appendContent, <SID>ConstructReturnContent('true'));
+        if l:returnType =~ 'bool'
+            call add(l:appendContent, <SID>ConstructReturnContent('true'))
+        elseif l:returnType =~ 'const char\*\s*' 
+            call add(l:appendContent, <SID>ConstructReturnContent('""'))
         elseif l:returnType =~ 'char'
-            call add(l:appendContent, <SID>ConstructReturnContent("''"));
+            call add(l:appendContent, <SID>ConstructReturnContent("'\\0'"))
         elseif l:returnType =~ 'int\|unsigned\|long\|char\|uint\|short\|float\|double'
             call add(l:appendContent, <SID>ConstructReturnContent('0'))
-        elseif l:returnType == 'void'
+        elseif l:returnType =~ 'void'
             " empty
+        elseif l:returnType =~ '\%(std::\)string\s*$'
+            call add(l:appendContent, <SID>ConstructReturnContent('""'))
         elseif l:returnType =~ '\*'
             call add(l:appendContent, <SID>ConstructReturnContent('NULL'))
+        elseif l:returnType =~ '&'
+            let l:returnType = substitute(l:returnType, '&', '', 'g')
+            let l:returnType = substitute(l:returnType, ' ', '', 'g')
+            call add(l:appendContent, <SID>ConstructReturnContent(l:returnType . '()'))
         elseif strlen(l:returnType) > 0
+            let l:returnType = substitute(l:returnType, ' ', '', 'g')
             call add(l:appendContent, <SID>ConstructReturnContent(l:returnType . '()'))
         endif
         call add(l:appendContent, '}')
