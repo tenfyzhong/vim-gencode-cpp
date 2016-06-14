@@ -110,7 +110,7 @@ function! s:GetNamespaceList(line) "{{{
 endfunction "}}}
 
 function! s:SearchFunction(content, line)
-    let l:content = escape(a:content, '.*\')
+    let l:content = escape(a:content, '.*~\')
     let l:content = substitute(l:content, ' ', '\_\s*', 'g')
     let l:content = l:content . '\s*$'
     let l:searchResult = search(l:content, '', a:line)
