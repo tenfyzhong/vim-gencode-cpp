@@ -211,7 +211,6 @@ function! gencode#definition#Generate() "{{{
 
     " no in the same file
     let l:namespace = join(l:namespaceList, '::') 
-    echom 'namespace: ' . l:namespace
     if !empty(l:namespace) && l:namespace[-2:-1] != '::'
         let l:namespace = l:namespace . '::'
     endif
