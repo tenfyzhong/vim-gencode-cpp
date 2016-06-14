@@ -69,7 +69,7 @@ function! s:GetTemplate(line, className) "{{{
     endif
 
     call cursor(a:line, 0)
-    let l:searchTemplate = search('template\_\s*<\%(\%(typename\|class\)\_\s\+\w\+\%(\_\s*=\_\s*\w\+\)\?\_\s*,\?\_\s*\)\+>\_\s*\%(class\|struct\)\_\s*' . a:className, 'b')
+    let l:searchTemplate = search('template\_\s*<\%(\%(typename\|class\)\_\s\+\w\+\_\s*\%(\_\s*=\_\s*\S\+\)\?\_\s*,\?\_\s*\)\+>\_\s*\%(class\|struct\)\_\s*' . a:className, 'b')
     if l:searchTemplate == 0
         return []
     endif
@@ -260,7 +260,7 @@ function! gencode#definition#Generate() "{{{
     if !empty(l:templateTypeBody)
         " let l:templateDeclaration = l:templateTypeBody 
         let l:templateDeclaration = substitute(l:templateTypeBody, '\w\+', 'typename &', 'g')
-        let l:templateDeclaration = 'template ' . l:templateDeclaration
+        let l:templateDeclaration = 'template' . l:templateDeclaration
         call add(l:appendContent, l:templateDeclaration)
     endif
 

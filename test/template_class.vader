@@ -1,0 +1,29 @@
+Given:
+  template<typename T1, 
+      typename T2 =   int, typename   T3 = std::string>
+  class HelloTemplate
+  {
+  public:
+      int Fun1(int a);
+  };
+
+Execute (generate Fun1):
+  set ft=cpp
+  6
+  GenDefinition
+
+Expect (Fun1):
+  template<typename T1, 
+      typename T2 =   int, typename   T3 = std::string>
+  class HelloTemplate
+  {
+  public:
+      int Fun1(int a);
+  };
+  
+  template<typename T1, typename T2, typename T3>
+  int HelloTemplate<T1, T2, T3>::Fun1(int a)
+  {
+      return 0;
+  }
+  
