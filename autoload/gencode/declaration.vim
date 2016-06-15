@@ -50,8 +50,10 @@ function! gencode#declaration#Generate() "{{{
     endif
 
     let l:functionDeclareList = getline(l:curline, l:functionLeftBraces)
-    let l:functionDeclare = join(l:functionDeclareList, '\n')
-    let l:functionDeclare = substitute(l:functionDeclare, '\s\s+', ' ', 'g')
+    let l:functionDeclare = join(l:functionDeclareList, ' ')
+    let l:functionDeclare = substitute(l:functionDeclare, '\s\s\+', ' ', 'g')
+    let l:functionDeclare = substitute(l:functionDeclare, '\s*\([(;]\)\s*', '\1', 'g')
+    let l:functionDeclare = substitute(l:functionDeclare, '\s*\()\)', '\1', 'g')
     let l:functionDeclare = substitute(l:functionDeclare, '\(\w\+\)\s*\(\*\|&\+\)\s*\(\w\+\)', '\1\2 \3', '')  " format to: int* func(...);
     let l:functionMatchList = matchlist(l:functionDeclare, '\(\%(\%(\w[a-zA-Z0-9_:*&]*\)\s\)\+\)\(\%(\w[a-zA-Z0-9_]*::\)*\)\(\S\+\s*(.*)\s*\%(const\)\?\)') " \1 match return type, \2 match class name, \3 match function name and argument
     try
@@ -71,7 +73,9 @@ function! gencode#declaration#Generate() "{{{
     normal ]}
     let l:appendLine = line('.') - 1
 
-    let l:appendContent = l:returnType . l:functionName . ';'
+    let l:appendContent = l:returnType . l:functionName 
+    let l:appendContent = substitute(l:appendContent, '\s*$', '', '')
+    let l:appendContent = l:appendContent . ';'
 
     let l:findLine = search('\V'.l:appendContent, 'bn', l:spaceNameLine)
     if l:findLine > 0
