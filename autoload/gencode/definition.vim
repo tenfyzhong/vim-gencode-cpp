@@ -14,7 +14,7 @@ endfunction "}}}
 
 function! s:GetDeclaration(line) "{{{
     let l:pos = getpos('.')
-    call cursor(a:line)
+    call cursor(a:line, 0)
     let l:functionBeginLine   = a:line
     let l:functionEndLine     = search(';\|{', 'n')
     call setpos('.', l:pos)
@@ -89,7 +89,7 @@ function! s:GetTemplate(line, className) "{{{
 endfunction "}}}
 
 function! s:GetNamespaceList(line) "{{{
-    call cursor(a:line)
+    call cursor(a:line, 0)
     normal [{
     let l:braceLine = line('.')
     if l:braceLine == a:line
@@ -118,6 +118,7 @@ function! s:SearchFunction(content, line)
 endfunction
 
 function! gencode#definition#Generate() "{{{
+    let l:oldPosition = getpos('.')
     let l:line        = line('.')
     let l:declareationFileName = expand('%')
     let l:declaration = <SID>GetDeclaration(l:line)
@@ -178,6 +179,7 @@ function! gencode#definition#Generate() "{{{
 
     if l:needChangeFile
         try
+            call setpos('.', l:oldPosition)
             exec ':A'
         catch
         endtry
@@ -312,4 +314,5 @@ function! gencode#definition#Generate() "{{{
     call add(l:appendContent, '')
     call append(l:appendLine, l:appendContent)
     call cursor(l:appendLine + 1, 0)
+    exec ':A'
 endfunction "}}}
