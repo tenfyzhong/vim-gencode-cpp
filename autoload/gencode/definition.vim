@@ -319,5 +319,7 @@ function! gencode#definition#Generate() "{{{
     call add(l:appendContent, '')
     call append(l:appendLine, l:appendContent)
     call cursor(l:appendLine + 1, 0)
-    exec ':A'
+    if l:needChangeFile
+        exec ':A'
+    endif
 endfunction "}}}
