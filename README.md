@@ -3,7 +3,7 @@ auto generate function definition or declaration
 
 # Features
 - generate the function definitions of class  
-- generate the static variable fefinitions of class  
+- generate the static variable definitions of class  
 - generate the declaration of the function
 
 # Install

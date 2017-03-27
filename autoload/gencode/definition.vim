@@ -31,9 +31,14 @@ function! s:IsInlineDeclaration(declaration) "{{{
 endfunction "}}}
 
 function! s:FormatDeclaration(declaration) "{{{
-    " remove virtual, static, explicit key word
     let l:lineContent = a:declaration
+
+    " remove virtual, static, explicit key word
     let l:lineContent = substitute(l:lineContent, '\%(virtual\|static\|explicit\|inline\)\s\+', '', 'g')
+
+    " remove trailing specifiers that will not appear in the definition
+    let l:lineContent = substitute(l:lineContent, '\s*\%(override\|final\)\s*', '', 'g')
+
     let l:lineContent = substitute(l:lineContent, '^\s\+', '', '') " delete header space
     let l:lineContent = substitute(l:lineContent, '\(\w\+\)\s*\(\%(\*\|&\)\+\)\s*\(\S\+(\)', '\1\2 \3', '')  " format to: int* func(...);
     let l:lineContent = substitute(l:lineContent, '\s\s\+', ' ', 'g') " delete more space
@@ -314,5 +319,7 @@ function! gencode#definition#Generate() "{{{
     call add(l:appendContent, '')
     call append(l:appendLine, l:appendContent)
     call cursor(l:appendLine + 1, 0)
-    exec ':A'
+    if l:needChangeFile
+        exec ':A'
+    endif
 endfunction "}}}
