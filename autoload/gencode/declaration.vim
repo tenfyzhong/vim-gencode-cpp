@@ -7,36 +7,39 @@
 " created: 2016-06-06 15:03:16
 "==============================================================
 
-function! s:GetInsertSpace(spaceName) "{{{
-    let l:spaceList = split(a:spaceName, '::')
-
-    let l:break = 0
-    for space in l:spaceList
-        let l:spaceNameLine = search('\%(class\|namespace\)\_\s\+' . space, 'b')
+function! s:GetSpaceNameLine(spaceList) "{{{
+    " Iterate over all space names to check they are present in the file.
+    call cursor(1,1) " Start at the top of the file.
+    let l:spaceNameLine = 0
+    for space in a:spaceList
+        let l:spaceNameLine = search('\%(class\|namespace\)\_\s\+' . space . '\%($\|\W\)')
         if l:spaceNameLine == 0
-            let l:break = 1
+            return 0
         endif
     endfor
+    return l:spaceNameLine
+endfunction "}}}
 
-    if l:break != 0
-        let l:fileExtend = expand('%:e')
-        if l:fileExtend ==? 'h'
-            " if already in header file, return 
-            return l:spaceNameLine
-        endif
+function! s:GetInsertSpace(spaceName) "{{{
+    let l:spaceList = split(a:spaceName, '::')
+    let l:spaceNameLine = <SID>GetSpaceNameLine(l:spaceList)
 
-        " in source file
+    let l:fileExtend = expand('%:e')
+    if l:fileExtend ==? 'h'
+        " if already in header file, return without checking
+        return l:spaceNameLine
+    endif
+
+    " We are in a source file.  If the space name has been found stop now.
+    " Otherwise switch to the header file and attempt to find the space name
+    " there instead.
+    if l:spaceNameLine == 0 " space line not found
         try
             exec ':A'
         catch
         endtry
 
-        for space in l:spaceList
-            let l:spaceNameLine = search('\%(class\|namespace\)\_\s\+' . space, 'b')
-            if l:spaceNameLine == 0
-                let l:break = 1
-            endif
-        endfor
+        let l:spaceNameLine = <SID>GetSpaceNameLine(l:spaceList)
     endif
 
     return l:spaceNameLine
