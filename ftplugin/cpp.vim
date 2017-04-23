@@ -12,5 +12,13 @@ if !exists(':A')
     finish
 endif
 
+if !exists('g:cpp_gencode_inlines_file_mode')
+    let g:cpp_gencode_inlines_file_mode = 'auto'
+endif
+
+if !exists('g:cpp_gencode_inlines_file_suffix')
+    let g:cpp_gencode_inlines_file_suffix = '.inl'
+endif
+
 command! GenDefinition call gencode#definition#Generate()
 command! GenDeclaration call gencode#declaration#Generate()

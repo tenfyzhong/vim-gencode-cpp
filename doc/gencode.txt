@@ -41,7 +41,9 @@ generate the declaration in the class's definiton.
 4. Configuration                                         *GencodeConfiguratin*
 You can configure the following settings to change the plugin working.  
 
-                                     *g:cpp_gencode_function_attach_statement*
+------------------------------------------------------------------------------
+4.1 Function attach statement        *g:cpp_gencode_function_attach_statement*
+
 Use the option to insert some statment into the definiton function body. 
 It must be a list, The element of the list is strings. The plugin will insert
 all the statment in the list into the function body line by line.
@@ -64,7 +66,28 @@ It will generate the code like this: >
     std::cout << "function body" << std::endl;
     return 0;
   }
-<
+
+------------------------------------------------------------------------------
+4.2 Inlines File Mode                        *g:cpp_gencode_inlines_file_mode*
+
+Default: 'auto'
+
+Set inline file usage mode.  The valid options are:
+- 'auto' - Use inlines file if one exists.  Otherwise use header file (default).
+- 'always' - Use inlines file if one exists.  Otherwise create one using the
+             first suffix in `g:cpp_gencode_inlines_file_suffix`.
+- 'never' - Disables all inline file support.
+
+------------------------------------------------------------------------------
+4.3 Inlines File Suffix                    *g:cpp_gencode_inlines_file_suffix*
+
+Default: '.inl'
+
+Comma separated list of valid inlines file suffixes.
+
+*Note:* The suffix must include the dot character.  This allows suffixes that
+include the file name to be supported e.g. `foo_inlines.h`
+
 ==============================================================================
 5. Dependency                                              *GencodeDependency*
 - a.vim https://github.com/vim-scripts/a.vim

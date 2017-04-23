@@ -114,13 +114,45 @@ function! s:GetNamespaceList(line) "{{{
     endif
 endfunction "}}}
 
-function! s:SearchFunction(content, line)
+function! s:SearchFunction(content, line) "{{{
     let l:content = escape(a:content, '.*~\')
     let l:content = substitute(l:content, ' ', '\_\s*', 'g')
     let l:content = l:content . '\s*$'
     let l:searchResult = search(l:content, '', a:line)
     return l:searchResult
-endfunction
+endfunction "}}}
+
+" Check if the current file matches a header file extension.
+" This function shoud work for a wide variety of naming conventions.
+function! s:isHeaderFile() "{{{
+    return expand('%:e') =~? '^h.\{0,2\}$'
+endfunction "}}}
+
+function! s:inlinesFile() "{{{
+    if !<SID>isHeaderFile() || g:cpp_gencode_inlines_file_mode ==? 'never'
+        return 0
+    endif
+
+    " auto or always. Check for existing inlines file
+    let l:filepath = expand('%:r') " file path without extension and dot
+    for suf in split(g:cpp_gencode_inlines_file_suffix, ',')
+        let l:file = l:filepath . suf
+        if filewritable(l:file)
+            exec ':e ' . l:file
+            return 1
+        endif
+    endfor
+
+    " If no inlines file exists create one if mode is always
+    if g:cpp_gencode_inlines_file_mode ==? 'always'
+        let l:file = l:filepath . split(g:cpp_gencode_inlines_file_suffix, ',')[0]
+        exec ':e ' . l:file
+        return 1
+    endif
+
+    " auto mode and no file found
+    return 0
+endfunction "}}}
 
 function! gencode#definition#Generate() "{{{
     let l:oldPosition = getpos('.')
@@ -135,8 +167,7 @@ function! gencode#definition#Generate() "{{{
     let l:isInline    = <SID>IsInlineDeclaration(l:declaration)
 
     " if header file, change to source file
-    let l:fileExtend = expand('%:e')
-    let l:needChangeFile = !l:isInline && l:fileExtend ==? 'h'
+    let l:needChangeFile = !l:isInline && <SID>isHeaderFile()
 
     let l:formatedDeclaration  = <SID>FormatDeclaration(l:declaration)
     let l:declarationDecompose = matchlist(l:formatedDeclaration, '\(\%(\%(\w[a-zA-Z0-9_:*&]*\)\s\)*\)\(\~\?\w[a-zA-Z0-9_]*\s*\((\?.*)\)\?\s*\%(const\)\?\)\s*\%(=\s*\w\+\)\?\s*;') " match function declare, \1 match return type, \2 match function name and argument, \3 match argument
@@ -182,12 +213,15 @@ function! gencode#definition#Generate() "{{{
     let l:namespaceList = <SID>GetNamespaceList(l:getNamespaceLine)
     call cursor(l:getNamespaceLine, 0)
 
+    let l:inlinesFile = 0
     if l:needChangeFile
         try
             call setpos('.', l:oldPosition)
             exec ':A'
         catch
         endtry
+    elseif l:isInline
+        let l:inlinesFile = <SID>inlinesFile()
     endif
 
     let l:definitionFileName = expand('%')
@@ -216,7 +250,7 @@ function! gencode#definition#Generate() "{{{
         endif
     endwhile
 
-    " no in the same file
+    " not in the same file
     let l:namespace = join(l:namespaceList, '::') 
     if !empty(l:namespace) && l:namespace[-2:-1] != '::'
         let l:namespace = l:namespace . '::'
@@ -251,9 +285,8 @@ function! gencode#definition#Generate() "{{{
         let l:appendLine = l:digInNamespaceEndLine - 1
     else
         let l:appendLine = line('$')
-        let l:fileExtend = expand('%:e')
         " if in header file, set the append line before the '#endif' line
-        if l:fileExtend ==? 'h'
+        if <SID>isHeaderFile()
             call cursor(l:appendLine, 0)
             let l:appendLine = search('#endif', 'b')
             if l:appendLine > 0
@@ -319,6 +352,12 @@ function! gencode#definition#Generate() "{{{
     call add(l:appendContent, '')
     call append(l:appendLine, l:appendContent)
     call cursor(l:appendLine + 1, 0)
+
+    if l:inlinesFile
+        " switch back to previous file
+        exec ':e #'
+    endif
+
     if l:needChangeFile
         exec ':A'
     endif

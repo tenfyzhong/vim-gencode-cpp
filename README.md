@@ -41,6 +41,20 @@ int Foo::function()
 }
 ```
 
+`g:cpp_gencode_inlines_file_mode`
+Set inline file usage mode.  The valid options are:
+- 'auto' - Use inlines file if one exists.  Otherwise use header file (default).
+- 'always' - Use inlines file if one exists.  Otherwise create one using the first suffix in `g:cpp_gencode_inlines_file_suffix`.
+- 'never' - Disables all inline file support.
+
+`g:cpp_gencode_inlines_file_suffix`
+Comma separated list of valid inlines file suffixes.
+
+Default:
+```let g:cpp_gencode_inlines_file_suffix = '.inl'```
+
+*Note:* The suffix must include the dot character.  This allows suffixes that include the file name to be supported e.g. `foo_inlines.h`
+
 # Dependency
 - [a.vim](https://github.com/vim-scripts/a.vim)
 
