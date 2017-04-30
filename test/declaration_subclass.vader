@@ -6,11 +6,11 @@ Given:
   {
   };
   }
-  
+
   void Hello::Fun1() const
   {
   }
-  
+
   long long Helloo::Fun2(
       int a,
       long b,
@@ -34,11 +34,11 @@ Expect:
   };
       void Fun1() const;
   }
-  
+
   void Hello::Fun1() const
   {
   }
-  
+
   long long Helloo::Fun2(
       int a,
       long b,
@@ -61,11 +61,11 @@ Expect:
       long long Fun2(int a, long b, char c);
   };
   }
-  
+
   void Hello::Fun1() const
   {
   }
-  
+
   long long Helloo::Fun2(
       int a,
       long b,
