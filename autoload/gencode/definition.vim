@@ -53,7 +53,7 @@ function! s:GetClassName(line) "{{{
     if l:cword !~ '{'
         return ''
     endif
-    let l:classBeginLine = search('\%(\<class\>\|\<struct\>\)\_\s\+\w\+\_\s\+\%(:\%(\_\s*\w\+\)\{1,2}\)\?\_\s*{', 'b')
+    let l:classBeginLine = search('\%(\<class\>\|\<struct\>\)\_\s\+\w\+\_\s\+\(\<final\>\)\?\_\s*\%(:\%(\_\s*\w\+\)\{1,2}\)\?\_\s*{', 'b')
     if l:classBeginLine == 0
         return ''
     endif
