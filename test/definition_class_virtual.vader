@@ -1,0 +1,67 @@
+Given:
+  class Hello : public 
+                world
+  {
+  public:
+      virtual void Fun1();
+      void Fun2() override;
+      void Fun3() override final;
+  }
+
+Execute:
+  set ft=cpp
+  5
+  GenDefinition
+
+Expect:
+  class Hello : public 
+                world
+  {
+  public:
+      virtual void Fun1();
+      void Fun2() override;
+      void Fun3() override final;
+  }
+  
+  void Hello::Fun1()
+  {
+  }
+  
+Execute:
+  set ft=cpp
+  6
+  GenDefinition
+
+Expect:
+  class Hello : public 
+                world
+  {
+  public:
+      virtual void Fun1();
+      void Fun2() override;
+      void Fun3() override final;
+  }
+  
+  void Hello::Fun2()
+  {
+  }
+  
+Execute:
+  set ft=cpp
+  7
+  GenDefinition
+
+Expect:
+  class Hello : public 
+                world
+  {
+  public:
+      virtual void Fun1();
+      void Fun2() override;
+      void Fun3() override final;
+  }
+  
+  void Hello::Fun3()
+  {
+  }
+  

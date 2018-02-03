@@ -5,7 +5,7 @@ Given:
   {
   class Hello
   {
-  public: 
+  public:
       void Fun1();
   };
 
@@ -13,30 +13,30 @@ Given:
   }
   }
 
-#Execute (Fun1):
-#  set ft=cpp
-#  8
-#  GenDefinition
-#
-#Expect (Fun1):
-#  namespace n1
-#  {
-#  namespace n2
-#  {
-#  class Hello
-#  {
-#  public: 
-#      void Fun1();
-#  };
-#
-#  void Fun2();
-#
-#  void Hello::Fun1()
-#  {
-#  }
-#
-#  }
-#  }
+Execute (Fun1):
+  set ft=cpp
+  8
+  GenDefinition
+
+Expect (Fun1):
+  namespace n1
+  {
+  namespace n2
+  {
+  class Hello
+  {
+  public:
+      void Fun1();
+  };
+
+  void Fun2();
+
+  void Hello::Fun1()
+  {
+  }
+
+  }
+  }
 
 Execute (Fun2):
   set ft=cpp
@@ -50,7 +50,7 @@ Expect (Fun2):
   {
   class Hello
   {
-  public: 
+  public:
       void Fun1();
   };
 
