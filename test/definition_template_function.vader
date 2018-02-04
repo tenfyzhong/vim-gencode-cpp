@@ -23,6 +23,9 @@ Given:
   public:
       template <typename T>
       T Fun1();
+
+      template <typename T, typename E>
+      T Fun2(E e);
   };
 
 Execute (generate Fun1):
@@ -55,6 +58,9 @@ Expect (Fun1):
   public:
       template <typename T>
       T Fun1();
+
+      template <typename T, typename E>
+      T Fun2(E e);
   };
 
   template<typename T1, typename T2, typename T3>
@@ -68,7 +74,7 @@ Execute (HelloTemplate.Fun2):
   9
   GenDefinition
 
-Expect (Fun1):
+Expect (HelloTemplate.Fun2):
   template<typename T1, 
       typename T2 =   int, typename   T3 = std::string>
   class HelloTemplate
@@ -93,6 +99,9 @@ Expect (Fun1):
   public:
       template <typename T>
       T Fun1();
+
+      template <typename T, typename E>
+      T Fun2(E e);
   };
 
   template<typename T1, typename T2, typename T3>
@@ -132,6 +141,9 @@ Expect (Hello.Fun1):
   public:
       template <typename T>
       T Fun1();
+
+      template <typename T, typename E>
+      T Fun2(E e);
   };
   
   template <class T> T Hello::Fun1()
@@ -144,7 +156,7 @@ Execute (Bye.Fun1):
   23
   GenDefinition
 
-Expect (Hello.Fun1):
+Expect (Bye.Fun1):
   template<typename T1, 
       typename T2 =   int, typename   T3 = std::string>
   class HelloTemplate
@@ -169,9 +181,52 @@ Expect (Hello.Fun1):
   public:
       template <typename T>
       T Fun1();
+
+      template <typename T, typename E>
+      T Fun2(E e);
   };
 
   template <typename T> T Bye::Fun1()
+  {
+      return T();
+  }
+  
+Execute (Bye.Fun2):
+  set ft=cpp
+  26
+  GenDefinition
+
+Expect (Bye.Fun2):
+  template<typename T1, 
+      typename T2 =   int, typename   T3 = std::string>
+  class HelloTemplate
+  {
+  public:
+      template <class T>
+      int Fun1(T a);
+
+      template <typename T>
+      int Fun2(T a);
+  };
+  
+  class Hello
+  {
+  public:
+      template <class T>
+      T Fun1();
+  };
+  
+  class Bye
+  {
+  public:
+      template <typename T>
+      T Fun1();
+
+      template <typename T, typename E>
+      T Fun2(E e);
+  };
+
+  template <typename T, typename E> T Bye::Fun2(E e)
   {
       return T();
   }

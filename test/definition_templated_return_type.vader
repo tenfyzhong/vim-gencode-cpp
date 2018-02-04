@@ -1,0 +1,86 @@
+Given:
+  class Hello : public 
+                world
+  {
+  public:
+      Result<int> Fun1();
+
+      template <typename T>
+      Result<T> Fun2();
+
+      template <class T, class E>
+      Result<T, E> Fun3();
+  }
+
+Execute:
+  set ft=cpp
+  5
+  GenDefinition
+
+Expect:
+  class Hello : public 
+                world
+  {
+  public:
+      Result<int> Fun1();
+
+      template <typename T>
+      Result<T> Fun2();
+
+      template <class T, class E>
+      Result<T, E> Fun3();
+  }
+  
+  Result<int> Hello::Fun1()
+  {
+      return Result<int>();
+  }
+  
+Execute:
+  set ft=cpp
+  7
+  GenDefinition
+
+Expect:
+  class Hello : public 
+                world
+  {
+  public:
+      Result<int> Fun1();
+
+      template <typename T>
+      Result<T> Fun2();
+
+      template <class T, class E>
+      Result<T, E> Fun3();
+  }
+  
+  template <typename T> Result<T> Hello::Fun2()
+  {
+      return Result<T>();
+  }
+  
+Execute:
+  set ft=cpp
+  10
+  GenDefinition
+
+Expect:
+  class Hello : public 
+                world
+  {
+  public:
+      Result<int> Fun1();
+
+      template <typename T>
+      Result<T> Fun2();
+
+      template <class T, class E>
+      Result<T, E> Fun3();
+  }
+  
+  template <class T, class E> Result<T, E> Hello::Fun3()
+  {
+      return Result<T,E>();
+  }
+  
