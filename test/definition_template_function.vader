@@ -24,7 +24,7 @@ Given:
       template <typename T>
       T Fun1();
 
-      template <typename T, typename E>
+      template <typename T, typename E = std::string>
       T Fun2(E e);
   };
 
@@ -59,7 +59,7 @@ Expect (Fun1):
       template <typename T>
       T Fun1();
 
-      template <typename T, typename E>
+      template <typename T, typename E = std::string>
       T Fun2(E e);
   };
 
@@ -101,7 +101,7 @@ Expect (HelloTemplate.Fun2):
       template <typename T>
       T Fun1();
 
-      template <typename T, typename E>
+      template <typename T, typename E = std::string>
       T Fun2(E e);
   };
 
@@ -144,7 +144,7 @@ Expect (Hello.Fun1):
       template <typename T>
       T Fun1();
 
-      template <typename T, typename E>
+      template <typename T, typename E = std::string>
       T Fun2(E e);
   };
   
@@ -185,7 +185,7 @@ Expect (Bye.Fun1):
       template <typename T>
       T Fun1();
 
-      template <typename T, typename E>
+      template <typename T, typename E = std::string>
       T Fun2(E e);
   };
 
@@ -226,7 +226,7 @@ Expect (Bye.Fun2):
       template <typename T>
       T Fun1();
 
-      template <typename T, typename E>
+      template <typename T, typename E = std::string>
       T Fun2(E e);
   };
 

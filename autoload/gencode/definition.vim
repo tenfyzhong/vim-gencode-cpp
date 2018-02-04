@@ -7,7 +7,7 @@
 " created: 2016-06-06 14:57:03
 "==============================================================
 
-let s:TEMPLATE_REGEX = 'template\_\s*<\_\s*\(class\|typename\)\_\s*\w\+\(\_\s*,\_\s*\(class\|typename\)\_\s*\w\+\)*\_\s*>'
+let s:TEMPLATE_REGEX = 'template\_\s*<\_\s*\(class\|typename\)\_\s*\w\+[^,>]*\(\_\s*,\_\s*\(class\|typename\)\_\s*\w\+[^,>]*\)*\_\s*>'
 
 function! s:ConstructReturnContent(returnContent) "{{{
     let l:returnContent = 'return ' . a:returnContent . ';'
@@ -33,7 +33,7 @@ function! s:IsInlineDeclaration(declaration) "{{{
 endfunction "}}}
 
 function! s:GetFunctionTemplate(declaration) "{{{
-    return matchstr(a:declaration, s:TEMPLATE_REGEX)
+    return substitute(matchstr(a:declaration, s:TEMPLATE_REGEX), '\_\s*=[^,>]\+', '', 'g')
 endfunction "}}}
 
 function! s:FormatDeclaration(declaration) "{{{
