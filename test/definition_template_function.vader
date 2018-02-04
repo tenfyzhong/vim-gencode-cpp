@@ -1,0 +1,178 @@
+Given:
+  template<typename T1, 
+      typename T2 =   int, typename   T3 = std::string>
+  class HelloTemplate
+  {
+  public:
+      template <class T>
+      int Fun1(T a);
+
+      template <typename T>
+      int Fun2(T a);
+  };
+
+  class Hello
+  {
+  public:
+      template <class T>
+      T Fun1();
+  };
+
+  class Bye
+  {
+  public:
+      template <typename T>
+      T Fun1();
+  };
+
+Execute (generate Fun1):
+  set ft=cpp
+  6
+  GenDefinition
+
+Expect (Fun1):
+  template<typename T1, 
+      typename T2 =   int, typename   T3 = std::string>
+  class HelloTemplate
+  {
+  public:
+      template <class T>
+      int Fun1(T a);
+
+      template <typename T>
+      int Fun2(T a);
+  };
+  
+  class Hello
+  {
+  public:
+      template <class T>
+      T Fun1();
+  };
+  
+  class Bye
+  {
+  public:
+      template <typename T>
+      T Fun1();
+  };
+
+  template<typename T1, typename T2, typename T3>
+  template <class T> int HelloTemplate<T1, T2, T3>::Fun1(T a)
+  {
+      return 0;
+  }
+  
+Execute (HelloTemplate.Fun2):
+  set ft=cpp
+  9
+  GenDefinition
+
+Expect (Fun1):
+  template<typename T1, 
+      typename T2 =   int, typename   T3 = std::string>
+  class HelloTemplate
+  {
+  public:
+      template <class T>
+      int Fun1(T a);
+
+      template <typename T>
+      int Fun2(T a);
+  };
+  
+  class Hello
+  {
+  public:
+      template <class T>
+      T Fun1();
+  };
+  
+  class Bye
+  {
+  public:
+      template <typename T>
+      T Fun1();
+  };
+
+  template<typename T1, typename T2, typename T3>
+  template <typename T> int HelloTemplate<T1, T2, T3>::Fun2(T a)
+  {
+      return 0;
+  }
+  
+
+Execute (Hello.Fun1):
+  set ft=cpp
+  16
+  GenDefinition
+
+Expect (Hello.Fun1):
+  template<typename T1, 
+      typename T2 =   int, typename   T3 = std::string>
+  class HelloTemplate
+  {
+  public:
+      template <class T>
+      int Fun1(T a);
+
+      template <typename T>
+      int Fun2(T a);
+  };
+  
+  class Hello
+  {
+  public:
+      template <class T>
+      T Fun1();
+  };
+  
+  class Bye
+  {
+  public:
+      template <typename T>
+      T Fun1();
+  };
+  
+  template <class T> T Hello::Fun1()
+  {
+      return T();
+  }
+  
+Execute (Bye.Fun1):
+  set ft=cpp
+  23
+  GenDefinition
+
+Expect (Hello.Fun1):
+  template<typename T1, 
+      typename T2 =   int, typename   T3 = std::string>
+  class HelloTemplate
+  {
+  public:
+      template <class T>
+      int Fun1(T a);
+
+      template <typename T>
+      int Fun2(T a);
+  };
+  
+  class Hello
+  {
+  public:
+      template <class T>
+      T Fun1();
+  };
+  
+  class Bye
+  {
+  public:
+      template <typename T>
+      T Fun1();
+  };
+
+  template <typename T> T Bye::Fun1()
+  {
+      return T();
+  }
+  

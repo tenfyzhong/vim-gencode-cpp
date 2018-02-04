@@ -30,6 +30,14 @@ function! s:IsInlineDeclaration(declaration) "{{{
     return match(a:declaration, 'inline') != -1
 endfunction "}}}
 
+function! s:GetFunctionTemplate(declaration) "{{{
+    let l:stuff = matchstr(a:declaration, 'template\_\s*<\(\_\s*\(class\|typename\)\_\s*\w\+\)\+\_\s*>')
+    if empty(l:stuff)
+       return ''
+    endif
+    return l:stuff . ' '
+endfunction "}}}
+
 function! s:FormatDeclaration(declaration) "{{{
     let l:lineContent = a:declaration
 
@@ -40,6 +48,7 @@ function! s:FormatDeclaration(declaration) "{{{
     let l:lineContent = substitute(l:lineContent, '\s*\%(override\|final\)\s*', '', 'g')
 
     let l:lineContent = substitute(l:lineContent, '^\s\+', '', '') " delete header space
+    let l:lineContent = substitute(l:lineContent, 'template\_\s*<\(class\|typename\)\(\_\s*\w\+\)\+\_\s*>\_\s*', '', '') " remove template stuff
     let l:lineContent = substitute(l:lineContent, '\(\w\+\)\s*\(\%(\*\|&\)\+\)\s*\(\S\+(\)', '\1\2 \3', '')  " format to: int* func(...);
     let l:lineContent = substitute(l:lineContent, '\s\s\+', ' ', 'g') " delete more space
     let l:lineContent = substitute(l:lineContent, '\s\+(', '(', '')
@@ -169,6 +178,7 @@ function! gencode#definition#Generate() "{{{
     " if header file, change to source file
     let l:needChangeFile = !l:isInline && <SID>isHeaderFile()
 
+    let l:functionTemplate = <SID>GetFunctionTemplate(l:declaration)
     let l:formatedDeclaration  = <SID>FormatDeclaration(l:declaration)
     let l:declarationDecompose = matchlist(l:formatedDeclaration, '\(\%(\%(\w[a-zA-Z0-9_:*&]*\)\s\)*\)\(\~\?\w[a-zA-Z0-9_]*\s*\((\?.*)\)\?\s*\%(const\)\?\)\s*\%(=\s*\w\+\)\?\s*;') " match function declare, \1 match return type, \2 match function name and argument, \3 match argument
     try
@@ -257,9 +267,9 @@ function! gencode#definition#Generate() "{{{
     endif
 
     if !empty(l:className) 
-        let l:lineContent = l:returnType . l:namespace . l:className . '::' . l:functionBody
+        let l:lineContent = l:functionTemplate . l:returnType . l:namespace . l:className . '::' . l:functionBody
     else
-        let l:lineContent = l:returnType . l:namespace . l:functionBody
+        let l:lineContent = l:functionTemplate . l:returnType . l:namespace . l:functionBody
     endif
 
     if empty(l:argument)
