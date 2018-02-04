@@ -5,7 +5,7 @@ Given:
   class Helloo
   {
   };
-  }
+  };
 
   void Hello::Fun1() const
   {
@@ -33,7 +33,7 @@ Expect:
   {
   };
       void Fun1() const;
-  }
+  };
 
   void Hello::Fun1() const
   {
@@ -60,7 +60,7 @@ Expect:
   {
       long long Fun2(int a, long b, char c);
   };
-  }
+  };
 
   void Hello::Fun1() const
   {

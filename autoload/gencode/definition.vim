@@ -55,24 +55,46 @@ function! s:FormatDeclaration(declaration) "{{{
     return l:lineContent
 endfunction "}}}
 
-function! s:GetClassName(line) "{{{
-    let l:cword = expand('<cword>')
-    if l:cword !~ '{'
-        return ''
+function! s:GetTemplateAndClassNameList(line) "{{{
+    call cursor(a:line, 0)
+    " jump to previous unmatched {
+    normal [{
+    let l:braceLine = line('.')
+    if l:braceLine == a:line
+        return []
     endif
+
     let l:classBeginLine = search('\%(\<class\>\|\<struct\>\)\_\s\+\w\+\_\s\+\(\<final\>\)\?\_\s*\%(:\%(\_\s*\w\+\)\{1,2}\)\?\_\s*{', 'b')
     if l:classBeginLine == 0
-        return ''
+        return []
     endif
-    let l:braceLine = search('{')
-    if l:braceLine != a:line
-        return ''
+
+    let l:searchBraceLine = search('{')
+    if l:braceLine != l:searchBraceLine
+        return []
     endif
+
     let l:lineContent = getline(l:classBeginLine, a:line)
     let l:classDeclaration = join(l:lineContent, ' ')
 
     let l:className = matchlist(l:classDeclaration, '\(\<class\>\|\<struct\>\)\s\+\(\w[a-zA-Z0-9_]*\)')[2]
-    return l:className
+    let l:templateTypeList = <SID>GetTemplate(l:braceLine, l:className)
+
+    let l:templateTypeBody = ''
+    if !empty(l:className) && !empty(l:templateTypeList)
+        let l:needChangeFile = 0
+
+        let l:templateTypeBody = '<' . l:templateTypeList[0]
+        let l:i = 1
+        while l:i < len(l:templateTypeList)
+            let l:templateTypeBody = l:templateTypeBody . ', ' . l:templateTypeList[l:i]
+            let l:i = l:i + 1
+        endwhile
+        let l:templateTypeBody = l:templateTypeBody . '>'
+        let l:className = l:className . l:templateTypeBody
+    endif
+
+    return add(<SID>GetTemplateAndClassNameList(l:braceLine), [ l:templateTypeBody, l:className ])
 endfunction "}}}
 
 function! s:GetTemplate(line, className) "{{{
@@ -196,27 +218,8 @@ function! gencode#definition#Generate() "{{{
         return
     endif
 
-    " jump to previous unmatch {
-    normal [{
-    let l:classBraceLine = line('.')
-    let l:className     = <SID>GetClassName(l:classBraceLine)
-    let l:templateTypeList   = <SID>GetTemplate(l:classBraceLine, l:className)
-
-    let l:templateTypeBody = ''
-    if !empty(l:className) && !empty(l:templateTypeList)
-        let l:needChangeFile = 0
-
-        let l:templateTypeBody = '<' . l:templateTypeList[0]
-        let l:i = 1
-        while l:i < len(l:templateTypeList)
-            let l:templateTypeBody = l:templateTypeBody . ', ' . l:templateTypeList[l:i]
-            let l:i = l:i + 1
-        endwhile
-        let l:templateTypeBody = l:templateTypeBody . '>'
-        let l:className = l:className . l:templateTypeBody
-    endif
-
-    let l:getNamespaceLine = empty(l:className) ? l:line : l:classBraceLine
+    let l:templatesAndClasses = <SID>GetTemplateAndClassNameList(line('.'))
+    let l:getNamespaceLine = empty(l:templatesAndClasses) ? l:line : line('.')
 
     let l:namespaceList = <SID>GetNamespaceList(l:getNamespaceLine)
     call cursor(l:getNamespaceLine, 0)
@@ -264,11 +267,17 @@ function! gencode#definition#Generate() "{{{
         let l:namespace = l:namespace . '::'
     endif
 
-    if !empty(l:className) 
-        let l:lineContent = l:returnType . l:namespace . l:className . '::' . l:functionBody
-    else
-        let l:lineContent = l:returnType . l:namespace . l:functionBody
-    endif
+    let l:lineContentList = [ l:returnType . l:namespace ]
+    for p in l:templatesAndClasses
+        let l:className = p[1]
+        if !empty(l:className)
+            call add(l:lineContentList, l:className)
+            call add(l:lineContentList, '::')
+        endif
+    endfor
+
+    call add(l:lineContentList, l:functionBody)
+    let l:lineContent = join(l:lineContentList, '')
 
     if empty(l:argument)
         let l:lineContent = l:lineContent . ';'
@@ -314,12 +323,15 @@ function! gencode#definition#Generate() "{{{
         call add(l:appendContent, '')
     endif
 
-    if !empty(l:templateTypeBody)
-        " let l:templateDeclaration = l:templateTypeBody 
-        let l:templateDeclaration = substitute(l:templateTypeBody, '\w\+', 'typename &', 'g')
+    for p in l:templatesAndClasses
+        let l:templateDeclaration = p[0]
+        if empty(l:templateDeclaration)
+            continue
+        endif
+        let l:templateDeclaration = substitute(l:templateDeclaration, '\w\+', 'typename &', 'g')
         let l:templateDeclaration = 'template' . l:templateDeclaration
         call add(l:appendContent, l:templateDeclaration)
-    endif
+    endfor
 
     if !empty(l:functionTemplate)
         call add(l:appendContent, l:functionTemplate)
