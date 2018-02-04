@@ -64,7 +64,8 @@ Expect (Fun1):
   };
 
   template<typename T1, typename T2, typename T3>
-  template <class T> int HelloTemplate<T1, T2, T3>::Fun1(T a)
+  template <class T>
+  int HelloTemplate<T1, T2, T3>::Fun1(T a)
   {
       return 0;
   }
@@ -105,7 +106,8 @@ Expect (HelloTemplate.Fun2):
   };
 
   template<typename T1, typename T2, typename T3>
-  template <typename T> int HelloTemplate<T1, T2, T3>::Fun2(T a)
+  template <typename T>
+  int HelloTemplate<T1, T2, T3>::Fun2(T a)
   {
       return 0;
   }
@@ -146,7 +148,8 @@ Expect (Hello.Fun1):
       T Fun2(E e);
   };
   
-  template <class T> T Hello::Fun1()
+  template <class T>
+  T Hello::Fun1()
   {
       return T();
   }
@@ -186,7 +189,8 @@ Expect (Bye.Fun1):
       T Fun2(E e);
   };
 
-  template <typename T> T Bye::Fun1()
+  template <typename T>
+  T Bye::Fun1()
   {
       return T();
   }
@@ -226,7 +230,8 @@ Expect (Bye.Fun2):
       T Fun2(E e);
   };
 
-  template <typename T, typename E> T Bye::Fun2(E e)
+  template <typename T, typename E>
+  T Bye::Fun2(E e)
   {
       return T();
   }

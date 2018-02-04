@@ -55,7 +55,8 @@ Expect:
       Result<T, E> Fun3();
   }
   
-  template <typename T> Result<T> Hello::Fun2()
+  template <typename T>
+  Result<T> Hello::Fun2()
   {
       return Result<T>();
   }
@@ -79,7 +80,8 @@ Expect:
       Result<T, E> Fun3();
   }
   
-  template <class T, class E> Result<T, E> Hello::Fun3()
+  template <class T, class E>
+  Result<T, E> Hello::Fun3()
   {
       return Result<T,E>();
   }

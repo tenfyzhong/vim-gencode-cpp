@@ -33,11 +33,7 @@ function! s:IsInlineDeclaration(declaration) "{{{
 endfunction "}}}
 
 function! s:GetFunctionTemplate(declaration) "{{{
-    let l:stuff = matchstr(a:declaration, s:TEMPLATE_REGEX)
-    if empty(l:stuff)
-       return ''
-    endif
-    return l:stuff . ' '
+    return matchstr(a:declaration, s:TEMPLATE_REGEX)
 endfunction "}}}
 
 function! s:FormatDeclaration(declaration) "{{{
@@ -269,9 +265,9 @@ function! gencode#definition#Generate() "{{{
     endif
 
     if !empty(l:className) 
-        let l:lineContent = l:functionTemplate . l:returnType . l:namespace . l:className . '::' . l:functionBody
+        let l:lineContent = l:returnType . l:namespace . l:className . '::' . l:functionBody
     else
-        let l:lineContent = l:functionTemplate . l:returnType . l:namespace . l:functionBody
+        let l:lineContent = l:returnType . l:namespace . l:functionBody
     endif
 
     if empty(l:argument)
@@ -323,6 +319,10 @@ function! gencode#definition#Generate() "{{{
         let l:templateDeclaration = substitute(l:templateTypeBody, '\w\+', 'typename &', 'g')
         let l:templateDeclaration = 'template' . l:templateDeclaration
         call add(l:appendContent, l:templateDeclaration)
+    endif
+
+    if !empty(l:functionTemplate)
+        call add(l:appendContent, l:functionTemplate)
     endif
 
     call add(l:appendContent, l:lineContent)
