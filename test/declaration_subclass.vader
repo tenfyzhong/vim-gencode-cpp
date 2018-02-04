@@ -11,7 +11,7 @@ Given:
   {
   }
 
-  long long Helloo::Fun2(
+  long long Hello::Helloo::Fun2(
       int a,
       long b,
       char c)
@@ -39,7 +39,7 @@ Expect:
   {
   }
 
-  long long Helloo::Fun2(
+  long long Hello::Helloo::Fun2(
       int a,
       long b,
       char c)
@@ -66,7 +66,7 @@ Expect:
   {
   }
 
-  long long Helloo::Fun2(
+  long long Hello::Helloo::Fun2(
       int a,
       long b,
       char c)
