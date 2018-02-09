@@ -9,11 +9,13 @@
 
 function! s:GetSpaceNameLine(spaceList) "{{{
     " Iterate over all space names to check they are present in the file.
+    let l:pos = getpos('.') " save cursor position
     call cursor(1,1) " Start at the top of the file.
     let l:spaceNameLine = 0
     for space in a:spaceList
         let l:spaceNameLine = search('\%(class\|namespace\)\_\s\+' . space . '\%($\|\W\)')
         if l:spaceNameLine == 0
+            call setpos('.', l:pos) " not found so restore cursor position
             return 0
         endif
     endfor
