@@ -6,7 +6,7 @@ CONTENTS                                                      *GencodeContent*
   1. Instro ........................................... |GencodeInstro|
   2. Usage ............................................ |GencodeUsage|
   3. Commands ......................................... |GencodeCommands|
-  4. Configuration .................................... |GencodeConfiguratin|
+  4. Configuration .................................... |GencodeConfiguration|
   5. Dependency ....................................... |Dependency|
   6. License .......................................... |GencodeLicense|
   7. Bugs ............................................. |GencodeBugs|
@@ -35,14 +35,14 @@ use :A command, and then generate the code.
 Let the cursor in a definition of a function. And then run the :GenDeclaration
 command, it will help you to generate the declaration of the function. It will 
 try find the class definition in the same file, or the header file, then 
-generate the declaration in the class's definiton. 
+generate the declaration in the class's definition. 
 
 ==============================================================================
-4. Configuration                                         *GencodeConfiguratin*
+4. Configuration                                         *GencodeConfiguration*
 You can configure the following settings to change the plugin working.  
 
                                      *g:cpp_gencode_function_attach_statement*
-Use the option to insert some statment into the definiton function body. 
+Use the option to insert some statment into the definition function body. 
 It must be a list, The element of the list is strings. The plugin will insert
 all the statment in the list into the function body line by line.
 default: >
